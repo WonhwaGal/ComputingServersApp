@@ -8,50 +8,49 @@ using ComputingServers.Infrastructure.Jobs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ComputingServers.Application.CQRS.Servers.Rent
+namespace ComputingServers.Application.CQRS.Servers.Rent;
+
+internal class RentServerCommandHandler(
+	IServerRepository serverRepository,
+	IUnitOfWork unitOfWork,
+	IQuartzService quartzService,
+	ILoggerManager loggerManager) : IRequestHandler<RentServerCommand, Result<string>>
 {
-	internal class RentServerCommandHandler(
-		IServerRepository serverRepository,
-		IUnitOfWork unitOfWork,
-		IQuartzService quartzService,
-		ILoggerManager loggerManager) : IRequestHandler<RentServerCommand, Result<string>>
+	public async Task<Result<string>> Handle(RentServerCommand request, CancellationToken cancellationToken)
 	{
-		public async Task<Result<string>> Handle(RentServerCommand request, CancellationToken cancellationToken)
+		try
 		{
-			try
-			{
-				var server = await serverRepository.GetByIdAsync(request.Id);
-				if (server is null)
-					return Result.Failure<string>(ServerErrors.NotFound(request.Id));
+			var server = await serverRepository.GetByIdAsync(request.Id);
+			if (server is null)
+				return Result.Failure<string>(ServerErrors.NotFound(request.Id));
 
-				if (!server.IsAvailable)
-					return Result.Failure<string>(ServerErrors.NotAvailable(request.Id));
-
-				server.IsAvailable = false;
-				server.RentedAt = DateTime.UtcNow;
-
-				if (server.Status == ServerStatus.PoweredOff)
-				{
-					server.Status = ServerStatus.Booting;
-					await quartzService.ScheduleJob<ServerPowerOnJob>("ServerId", server.Id, 1);
-					await quartzService.ScheduleJob<ServerReleaseJob>("ServerId", server.Id, 2);
-				}
-
-				await unitOfWork.SaveChangesAsync();
-
-				loggerManager.LogInfo($"Server with ID {server.Id} was successfully rented with current status {server.Status}");
-				return Result.Success(ServerHelper.FormStatusResponse(server.Status));
-			}
-			catch (DbUpdateConcurrencyException)
-			{
-				loggerManager.LogError($"Failure when renting: server is already rented");
+			if (!server.IsAvailable)
 				return Result.Failure<string>(ServerErrors.NotAvailable(request.Id));
-			}
-			catch (Exception ex)
+
+			server.IsAvailable = false;
+			server.RentedAt = DateTime.UtcNow;
+
+			if (server.Status == ServerStatus.PoweredOff)
 			{
-				loggerManager.LogError($"Failure when renting server: {ex.Message}");
-				return Result.Failure<string>(ServerErrors.FailureOnRent(request.Id));
+				server.Status = ServerStatus.Booting;
+				await quartzService.ScheduleJob<ServerPowerOnJob>("ServerId", server.Id, 5);
+				await quartzService.ScheduleJob<ServerReleaseJob>("ServerId", server.Id, 20);
 			}
+
+			await unitOfWork.SaveChangesAsync();
+
+			loggerManager.LogInfo($"Server with ID {server.Id} was successfully rented with current status {server.Status}");
+			return Result.Success(ServerHelper.FormStatusResponse(server.Status));
+		}
+		catch (DbUpdateConcurrencyException)
+		{
+			loggerManager.LogError($"Failure when renting: server is already rented");
+			return Result.Failure<string>(ServerErrors.NotAvailable(request.Id));
+		}
+		catch (Exception ex)
+		{
+			loggerManager.LogError($"Failure when renting server: {ex.Message}");
+			return Result.Failure<string>(ServerErrors.FailureOnRent(request.Id));
 		}
 	}
 }

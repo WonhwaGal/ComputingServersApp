@@ -1,9 +1,8 @@
 ﻿using System.Reflection;
 
-namespace ComputingServersApp
+namespace ComputingServersApp;
+
+public static class ApiAssemblyReference
 {
-	public static class ApiAssemblyReference
-	{
-		public static Assembly Assembly => typeof(ApiAssemblyReference).Assembly;
-	}
+	public static Assembly Assembly => typeof(ApiAssemblyReference).Assembly;
 }

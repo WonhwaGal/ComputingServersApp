@@ -1,9 +1,8 @@
 ﻿using System.Reflection;
 
-namespace ComputingServers.Domain
+namespace ComputingServers.Domain;
+
+public static class DomainAssemblyReference
 {
-	public static class DomainAssemblyReference
-	{
-		public static Assembly Assembly => typeof(DomainAssemblyReference).Assembly;
-	}
+	public static Assembly Assembly => typeof(DomainAssemblyReference).Assembly;
 }

@@ -1,8 +1,7 @@
 ﻿
-namespace ComputingServers.Domain.Entities
+namespace ComputingServers.Domain.Entities;
+
+public class DatabaseEntity
 {
-	public class DatabaseEntity
-	{
-		public string Id { get; set; }
-	}
+	public string Id { get; set; }
 }

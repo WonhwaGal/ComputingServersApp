@@ -9,36 +9,35 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
 
-namespace ComputingServers.Infrastructure
+namespace ComputingServers.Infrastructure;
+
+public static class Infrastructure
 {
-	public static class Infrastructure
+	public static void Configure(IServiceCollection services, IConfiguration configuration)
 	{
-		public static void Configure(IServiceCollection services, IConfiguration configuration)
+		string databaseConnectionString = configuration.GetConnectionString("Database")!;
+
+		services.AddDbContext<AppDbContext>(options =>
+			options.UseSqlServer(databaseConnectionString));
+
+		services.AddScoped<IServerRepository, ServerRepository>();
+
+		services.AddScoped<IQuartzService, QuartzService>();
+		services.AddQuartz(q =>
 		{
-			string databaseConnectionString = configuration.GetConnectionString("Database")!;
+			q.UseMicrosoftDependencyInjectionJobFactory();
+		});
 
-			services.AddDbContext<AppDbContext>(options =>
-				options.UseSqlServer(databaseConnectionString));
+		services.AddQuartzHostedService(options =>
+		{
+			options.WaitForJobsToComplete = true;
+		});
 
-			services.AddScoped<IServerRepository, ServerRepository>();
+		services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AppDbContext>());
 
-			services.AddScoped<IQuartzService, QuartzService>();
-			services.AddQuartz(q =>
-			{
-				q.UseMicrosoftDependencyInjectionJobFactory();
-			});
-
-			services.AddQuartzHostedService(options =>
-			{
-				options.WaitForJobsToComplete = true;
-			});
-
-			services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AppDbContext>());
-
-			services.AddMediatR(config =>
-			{
-				config.RegisterServicesFromAssemblies(ApplicationAssemblyReference.Assembly);
-			});
-		}
+		services.AddMediatR(config =>
+		{
+			config.RegisterServicesFromAssemblies(ApplicationAssemblyReference.Assembly);
+		});
 	}
 }

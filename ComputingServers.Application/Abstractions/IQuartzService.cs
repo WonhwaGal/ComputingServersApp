@@ -1,9 +1,8 @@
 ﻿using Quartz;
 
-namespace ComputingServers.Application.Abstractions
+namespace ComputingServers.Application.Abstractions;
+
+public interface IQuartzService
 {
-	public interface IQuartzService
-	{
-		Task ScheduleJob<TJob>(string jobName, string serverId, int minuteOffset) where TJob : IJob;
-	}
+	Task ScheduleJob<TJob>(string jobName, string serverId, int minuteOffset) where TJob : IJob;
 }

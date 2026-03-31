@@ -1,6 +1,5 @@
 ﻿using ComputingServers.Application.Abstractions;
 using ComputingServers.Application.CQRS.Servers.Rent;
-using ComputingServers.Application.Repositories;
 using ComputingServers.Domain.Entities;
 using ComputingServers.Domain.Enums;
 using ComputingServers.Domain.Results;

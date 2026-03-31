@@ -1,8 +1,7 @@
 ﻿
-namespace ComputingServers.Infrastructure.Persistence
+namespace ComputingServers.Infrastructure.Persistence;
+
+internal static class Schemas
 {
-	internal static class Schemas
-	{
-		public static string Servers = "servers";
-	}
+	public static string Servers = "servers";
 }

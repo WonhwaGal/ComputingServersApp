@@ -1,8 +1,6 @@
-﻿using ComputingServers.Application.Abstractions;
-using ComputingServers.Application.CQRS.Servers.GetAll;
+﻿using ComputingServers.Application.CQRS.Servers.GetAll;
 using ComputingServers.Application.CQRS.Servers.GetAvailable;
 using ComputingServers.Application.Dtos;
-using ComputingServers.Application.Repositories;
 using ComputingServers.Domain.Entities;
 using ComputingServers.Domain.Enums;
 using ComputingServers.Tests.UnitTest.Application;
