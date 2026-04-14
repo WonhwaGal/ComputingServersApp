@@ -19,7 +19,6 @@ public class ServerConfiguration : IEntityTypeConfiguration<Server>
 				str => (ServerStatus)Enum.Parse(typeof(ServerStatus), str));
 
 		builder.Property(x => x.Version)
-			.IsRowVersion()
-			.IsConcurrencyToken();
+			.IsRowVersion();
 	}
 }
